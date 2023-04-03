@@ -1,10 +1,11 @@
 package com.example.unidad1;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-
 
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,23 +36,26 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(txtEmail.getText().toString().equals("admin@admin.com") &&
-                        txtPass.getText().toString().equals("admin")) {
-                    Intent intent = new Intent (v.getContext(), Inicio.class);
-                    startActivityForResult(intent,  0);
+                AdminSQlite admin = new AdminSQlite(getApplicationContext(), "Admin", null, 1 );
+                SQLiteDatabase db = admin.getWritableDatabase();
 
-                }else{
-                    txtEmail.setVisibility(View.VISIBLE);
-                    txtEmail.setBackgroundColor(Color.RED);
-                    counter--;
-                    txtEmail.setText(Integer.toString(counter));
+                String email = txtEmail.getText().toString();
+                String password  = txtPass.getText().toString();
 
-                    if (counter == 0) {
-                        btnLogin.setEnabled(false);
+                Cursor fila = db.rawQuery("select Email, pass from usuario where Email='" +
+                        email + "' and pass ='" + password + "'", null);
+
+                if(fila.moveToFirst()){
+                    String txtEmail=fila.getString(0);
+                    String txtPass=fila.getString(1);
+                    if (txtEmail.equals(email) && txtPass.equals(password)) {
+                        Intent i = new Intent(MainActivity.this, EsperaActivity.class);
+                        startActivity(i);
                     }
                 }
             }
         });
+
 
         link_to_register.setOnClickListener(new View.OnClickListener() {
             @Override
